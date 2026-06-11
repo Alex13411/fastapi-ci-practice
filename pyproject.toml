@@ -6,6 +6,7 @@ include = '\.pyi?$'
 [tool.isort]
 profile = "black"
 line_length = 88
+known_third_party = ["fastapi", "sqlalchemy", "pytest", "httpx"]
 
 [tool.mypy]
 python_version = "3.10"

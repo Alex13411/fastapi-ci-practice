@@ -1,3 +1,5 @@
+from collections.abc import AsyncGenerator
+
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
@@ -14,7 +16,7 @@ TestingSessionLocal = async_sessionmaker(
 
 
 @pytest_asyncio.fixture(autouse=True, loop_scope="function")
-async def init_db():
+async def init_db() -> AsyncGenerator[None, None]:
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
@@ -22,7 +24,7 @@ async def init_db():
         await conn.run_sync(Base.metadata.drop_all)
 
 
-async def override_get_db():
+async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
     async with TestingSessionLocal() as session:
         yield session
 
@@ -31,7 +33,7 @@ app.dependency_overrides[get_db] = override_get_db
 
 
 @pytest.mark.asyncio(loop_scope="function")
-async def test_cookbook_workflow():
+async def test_cookbook_workflow() -> None:
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
